@@ -10,14 +10,19 @@ const brickColumnCount = 6;
 let scoreCounter = 0;
 
 
-const brickInfo = {
-  width: 100,
-  height: 30,
-  padding: 15,
-  offsetX: 62.5,
-  offsetY: 60,
-  visible: true
-};
+const brickInfo = createBrick(100, 10);
+
+function createBrick(width, padding) {
+  return {
+    width: width,
+    height: 30,
+    padding: padding,
+    offsetX: (canvas.width - ((brickColumnCount * width) + ((brickColumnCount -1) * padding))) / 2,
+    offsetY: 60,
+    visible: true
+  }
+}
+
 
 const bricks = [];
 for(let i = 0; i < brickColumnCount; i++){
@@ -40,13 +45,12 @@ const ball = {
 
 const paddle = {
   x: canvas.width / 2 - 40,
-  y: canvas.height - 20,
+  y: canvas.height - 60,
   width: 80,
   height: 10,
   speed: 8,
   dx: 0,
 };
-
 
 function drawBall() {
   ctx.beginPath();
@@ -55,7 +59,6 @@ function drawBall() {
   ctx.fill();
   ctx.closePath();
 }
-
 
 function drawPaddle() {
   ctx.beginPath();
@@ -85,7 +88,65 @@ function drawBricks() {
   })
 }
 
+function movePaddle() {
+  paddle.x += paddle.dx;
+  if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
+  if (paddle.x < 0) paddle.x = 0;
+}
+
+function moveBall() {
+  ball.x += ball.dx;
+  ball.y += ball.dy;
+
+  if (ball.x + ball.size > canvas.width || ball.x - ball.size < 0) ball.dx *= -1;
+  if (ball.y + ball.size > canvas.height || ball.y - ball.size < 0) ball.dy *= -1;
+
+  if(
+    ball.x - ball.size > paddle.x &&
+    ball.x - ball.size < paddle.x + paddle.width &&
+    ball.y + ball.size > paddle.y
+  ) ball.dy = - ball.speed;
+
+
+  bricks.forEach( column => {
+    column.forEach( brick => {
+      if (brick.visible){
+        if (ball.x - ball.size > brick.x &&
+          ball.x - ball.size < brick.x + brick.width &&
+          ball.y + ball.size > brick.y &&
+          ball.y - ball.size < brick.y + brick.height) {
+          ball.dy *= -1;
+          brick.visible = false;
+
+          increaseScore();
+        }
+      }
+    })
+    });
+
+  if (ball.y + ball.size > canvas.height){
+    showAllBricks();
+    scoreCounter = 0;
+    scoreShow();
+  }
+}
+
+function increaseScore() {
+  scoreCounter++;
+  scoreShow();
+  if (scoreCounter % (brickRowCount * brickRowCount) === 0) showAllBricks();
+
+}
+
+function showAllBricks() {
+  bricks.forEach( column => {
+    column.forEach( brick => (brick.visible = true))
+  })
+}
+
 function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
   drawBall();
   drawPaddle();
   drawBricks();
@@ -95,8 +156,29 @@ function scoreShow() {
   score.innerHTML = `Score: ${scoreCounter}`;
 }
 
-scoreShow();
-draw();
+
+
+function update() {
+  movePaddle();
+  moveBall();
+  draw();
+  requestAnimationFrame(update);
+}
+
+update();
+
+function keyDown(e) {
+  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'в') {
+    paddle.dx = paddle.speed;
+  } else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'ф'){
+    paddle.dx = - paddle.speed;
+  }
+}
+
+
+function keyUp(e) {
+  if (e.key === 'ArrowRight'|| e.key === 'd' || e.key === 'в' || e.key === 'ArrowLeft'|| e.key === 'a' || e.key === 'ф') paddle.dx = 0;
+}
 
 function  toggleRules() {
   if(!rules.classList.contains('show')) {
@@ -109,3 +191,6 @@ function  toggleRules() {
 }
 
 rulesBtn.addEventListener('click', toggleRules);
+
+document.addEventListener('keydown', keyDown);
+document.addEventListener('keyup', keyUp);
