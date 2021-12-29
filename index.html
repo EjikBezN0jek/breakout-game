@@ -9,16 +9,32 @@
   <title>Breakout Game</title>
 </head>
 <body>
-    <h1>Breakout!</h1>
-    <button class="btn rules-btn">Show rules</button>
+    <h1 class="title title--main">Breakout!</h1>
+
     <div class="rules">
-      <p class="rules-title">How to play:</p>
+      <p class="rules-title title">How to play:</p>
       <p class="rules-text">Use your right and left keys to move the paddle to bounce the ball up and break the blocks.</p>
       <p class="rules-text">If you miss the ball, your score and blocks will reset.</p>
+      <button class="btn rules-btn">Show rules</button>
     </div>
-    <div class="score">Score: 0</div>
-    <canvas class="canvas" width="800" height="600"></canvas>
 
+    <div class="board" data-stage="prepare">
+      <div class="score">Score: 0</div>
+      <canvas class="canvas" width="800" height="600"></canvas>
+      <div class="modal prepare">
+        <button class="start-btn btn">Start the game</button>
+      </div>
+      <div class="modal win">
+        <p class="title title--main">Congratulations!</p>
+        <p class="final-score">Your score: </p>
+        <button class="start-btn btn">Retry</button>
+      </div>
+      <div class="modal lose">
+        <p class="title title--main">Game Over</p>
+        <p class="final-score">Your score: </p>
+        <button class="start-btn btn">Try again</button>
+      </div>
+    </div>
 <script src="script.js"></script>
 </body>
 </html>
